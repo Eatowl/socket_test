@@ -43,7 +43,7 @@ int main() {
 	*/
 	saddr.sin_family = PF_INET;
 	saddr.sin_port = htons(3425);
-	saddr.sin_addr.s_addr=inet_addr("127.0.0.2");
+	saddr.sin_addr.s_addr = inet_addr("127.0.0.2");
 	/*
 		Функция connect(), устанавливает соединение
 		сокета cl_sock с сокетом сервера, адрес которого представлен
@@ -63,17 +63,17 @@ int main() {
 		/*
 			отправка сообщения на сервер
 		*/
-    	send(cl_sock, buffer, sizeof(buffer), 0);
-    	int bytes_read = 0;
-    	printf("Ожидание сообщения\n");
-    	/*
+		send(cl_sock, buffer, sizeof(buffer), 0);
+		int bytes_read = 0;
+		printf("Ожидание сообщения\n");
+		/*
 			прием сообщения от сервера
 		*/
-    	bytes_read = recv(cl_sock, message, sizeof(buffer), 0);
-    	printf("Получено %d bytes\tСообщение: %s\n", bytes_read, message);
-    	/*
+		bytes_read = recv(cl_sock, message, sizeof(buffer), 0);
+		printf("Получено %d bytes\tСообщение: %s\n", bytes_read, message);
+		/*
 			Очистка массивов 
-    	*/
+		*/
 		bzero(buffer, MAX_BUF);
 		bzero(message, MAX_BUF);
 	}	

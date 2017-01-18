@@ -50,7 +50,7 @@ int main() {
 	*/
 	saddr.sin_family = PF_INET;
 	saddr.sin_port = htons(3425);
-	saddr.sin_addr.s_addr=inet_addr("127.0.0.2");
+	saddr.sin_addr.s_addr = inet_addr("127.0.0.2");
 	/*
 		Созданному сокету server_socket, необходимо назначить адрес,
 		который был указан выше в струтуре sockaddr_in,
@@ -91,11 +91,10 @@ int main() {
 			*/
 			send(client_socket, buf, count, 0);
         }
-    
-        close(client_socket); // закрываем сокет клиента
+        close(client_socket);  // закрываем сокет клиента
         exit(0);
 	}
 	free(buf);
-	close(server_socket); // закрываем сокет сервера
+	close(server_socket);  // закрываем сокет сервера
 	return 0;
 }
