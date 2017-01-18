@@ -93,7 +93,7 @@ int main() {
         }
     
         close(client_socket); // закрываем сокет клиента
-        _exit(0);
+        exit(0);
 	}
 	free(buf);
 	close(server_socket); // закрываем сокет сервера
