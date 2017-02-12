@@ -34,10 +34,18 @@ int main() {
 			return 0;
 		}
 		printf("отправка сообщения на сервер...\n");
-		send(cl_sock, buffer, sizeof(buffer), 0);
+		if (send(cl_sock, buffer, sizeof(buffer), 0) == -1) {
+			perror("send() error");
+			close(cl_sock);
+			exit(1);
+		}
 		int bytes_read = 0;
 		printf("Ожидание сообщения\n");
-		bytes_read = recv(cl_sock, message, sizeof(buffer), 0);
+		if ((bytes_read = recv(cl_sock, message, sizeof(buffer), 0)) == -1) {
+			perror("recv() error");
+			close(cl_sock);
+			exit(1);
+		}
 		printf("Получено %d bytes\tСообщение: %s\n", bytes_read, message);
 		bzero(buffer, MAX_BUF);
 		bzero(message, MAX_BUF);

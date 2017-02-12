@@ -31,14 +31,14 @@ int main() {
 	while (1) {
 		client_len = sizeof(caddr);
 		if (recvfrom(server_socket, buf, MAX_BUF, 0, (struct sockaddr *) &caddr, &client_len) < 0) {
-			perror(NULL);
+			perror("recvfrom() error");
 			close(server_socket);
 			exit(1);
 		}
 		strcat(buf, "_serv");
 		if (!strcmp(buf, "exit")) break;
 		if (sendto(server_socket, buf, strlen(buf), 0, (struct sockaddr *) &caddr, client_len) < 0) {
-			perror(NULL);
+			perror("sendto() error");
 			close(server_socket);
 			exit(1);
 		}
