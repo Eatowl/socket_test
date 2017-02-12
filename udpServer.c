@@ -36,12 +36,12 @@ int main() {
 			exit(1);
 		}
 		strcat(buf, "_serv");
-        if (!strcmp(buf, "exit")) break;
-        if (sendto(server_socket, buf, strlen(buf), 0, (struct sockaddr *) &caddr, client_len) < 0) {
-            perror(NULL);
-            close(server_socket);
-            exit(1);
-        }
+		if (!strcmp(buf, "exit")) break;
+		if (sendto(server_socket, buf, strlen(buf), 0, (struct sockaddr *) &caddr, client_len) < 0) {
+			perror(NULL);
+			close(server_socket);
+			exit(1);
+		}
 	}
 	free(buf);
 	close(server_socket);
