@@ -58,7 +58,7 @@ int main() {
 				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, client_socket, &ev) == -1) {
 					perror("epoll_ctl: server_socket");
 					exit(1);
-					}
+				}
 			} else {
 				if (events[i].events & EPOLLIN) {
 					printf("-> event=%lu on fd=%d\n",
