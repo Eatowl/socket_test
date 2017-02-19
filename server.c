@@ -10,8 +10,8 @@
 #include <sys/un.h>
 #include <sys/epoll.h>
 
-#define MAX_EVENTS		10
-#define MAX_BUF			256
+#define MAX_EVENTS	10
+#define MAX_BUF		256
 
 int main() {
 	int server_socket, client_socket;
