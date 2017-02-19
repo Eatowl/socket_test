@@ -35,27 +35,27 @@ int main() {
 	struct epoll_event ev, events[MAX_EVENTS];
 	int count, nfds, epollfd;
 	if ((epollfd = epoll_create1(0)) == -1) {
-        perror("epoll_create");
-        exit(1);
-    }
-    ev.events = EPOLLIN;
-    ev.data.fd = server_socket;
-    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, server_socket, &ev) == -1) {
-        perror("epoll_ctl: server_socket");
-        exit(1);
-    }
+		perror("epoll_create");
+		exit(1);
+	}
+	ev.events = EPOLLIN;
+	ev.data.fd = server_socket;
+	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, server_socket, &ev) == -1) {
+		perror("epoll_ctl: server_socket");
+		exit(1);
+	}
 	while (1) {
 		if ((nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1)) == -1)
-            perror("epoll_wait");
-        for (int i = 0; i < nfds; ++i) {
+			perror("epoll_wait");
+		for (int i = 0; i < nfds; ++i) {
         	if (events[i].data.fd == server_socket) {
 	        	if ((client_socket = accept(server_socket, NULL, NULL)) == -1) {
 	        		perror("accept error");
 	        		exit(1);
 	        	}
-	        	ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
-                ev.data.fd = client_socket;
-                if (epoll_ctl(epollfd, EPOLL_CTL_ADD, client_socket, &ev) == -1) {
+				ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+				ev.data.fd = client_socket;
+				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, client_socket, &ev) == -1) {
 			        perror("epoll_ctl: server_socket");
 			        exit(1);
 			    }
@@ -63,7 +63,7 @@ int main() {
 	        	if (events[i].events & EPOLLIN) {
 		    		printf("-> event=%lu on fd=%d\n",
 		        		(unsigned long)events[i].events,
-		        						events[i].data.fd);
+										events[i].data.fd);
 			        if ((count = recv(events[i].data.fd, buf, MAX_BUF, 0)) == -1)
 			        	perror("recv error");
 			        printf("->>%s\n", buf);
