@@ -48,11 +48,11 @@ int main() {
 		if ((nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1)) == -1)
 			perror("epoll_wait");
 		for (int i = 0; i < nfds; ++i) {
-        	if (events[i].data.fd == server_socket) {
-	        	if ((client_socket = accept(server_socket, NULL, NULL)) == -1) {
-	        		perror("accept error");
-	        		exit(1);
-	        	}
+			if (events[i].data.fd == server_socket) {
+				if ((client_socket = accept(server_socket, NULL, NULL)) == -1) {
+					perror("accept error");
+					exit(1);
+				}
 				ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
 				ev.data.fd = client_socket;
 				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, client_socket, &ev) == -1) {
