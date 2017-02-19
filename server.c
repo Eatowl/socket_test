@@ -10,9 +10,8 @@
 #include <sys/un.h>
 #include <sys/epoll.h>
 
-#define QUEUE_LENGTH 5
-#define MAX_EVENTS	 10
-#define MAX_BUF		 256
+#define MAX_EVENTS		10
+#define MAX_BUF			256
 
 int main() {
 	int server_socket, client_socket;
@@ -28,7 +27,7 @@ int main() {
 		perror("bind() error");
 		exit(1);
 	}
-	if (listen(server_socket, QUEUE_LENGTH) == -1) {
+	if (listen(server_socket, MAX_EVENTS) == -1) {
 		perror("listen() error");
 		exit(1);
 	}
@@ -63,7 +62,7 @@ int main() {
 				if (events[i].events & EPOLLIN) {
 					printf("-> event=%lu on fd=%d\n",
 						(unsigned long)events[i].events,
-									events[i].data.fd);
+								events[i].data.fd);
 					if ((count = recv(events[i].data.fd, buf, MAX_BUF, 0)) == -1)
 						perror("recv error");
 					printf("->>%s\n", buf);
