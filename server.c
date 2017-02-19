@@ -8,93 +8,72 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/un.h>
+#include <sys/epoll.h>
 
-#define QUEUE_LENGTH 1
-#define MAX_BUF 256
+#define QUEUE_LENGTH 5
+#define MAX_BUF 	 256
+#define MAX_EVENTS   10
 
 int main() {
-	/*
-		Дескрипторы сокета
-	*/
 	int server_socket, client_socket;
-	/*
-		Структура задает адресное пространство и сам адрес
-		sockaddr_in - структура для интернет сокетов
-	*/
 	struct sockaddr_in saddr;
 	char *buf;
-	/*
-		Системный вызов socket предназначен для создания сокета
-		PF_INET - определяет протокол сокета,
-		в данном случае используется интернет протокол,
-		так же существует локальный протокол
-		SOCK_STREAM - способ взаимодействия,
-		определяет данный сокет как потоковый
-		0 - автоматический выбор протокола передачи данных
-	*/
 	server_socket = socket(PF_INET, SOCK_STREAM, 0);
 	buf = (char *) malloc(MAX_BUF);
-	/*
-		Обнуляем исходную структуру
-	*/
 	bzero(&saddr, sizeof(saddr));
-	/*
-		Задаем исходные параметры подключения
-		- Выбираем протокол
-		- Назначаем порт
-		- Задаем адрес
-		Последние два пункта имеют сетевой порядок байтов,
-		поэтому требуется преобразование из серверного в сетевой.
-		Порт преобразуется функцией htons.
-		Адрес преобразуется функцией inet_addr.
-	*/
-	saddr.sin_family = PF_INET;
+	saddr.sin_family = AF_INET;
 	saddr.sin_port = htons(3425);
 	saddr.sin_addr.s_addr = inet_addr("127.0.0.2");
-	/*
-		Созданному сокету server_socket, необходимо назначить адрес,
-		который был указан выше в струтуре sockaddr_in,
-		за это отвечает функция bind()
-	*/
 	if (bind(server_socket, (struct sockaddr *) &saddr, sizeof(saddr)) == -1) {
 		perror("bind() error");
-		return 1;
+		exit(1);
 	}
-	/*
-		Сервер находится в режиме прослушивания, ожидая подключения клиента.
-		За это отвечает функция bind(), в ней указывается сокет и максимальный
-		размер очереди запросов на подключение
-	*/
 	if (listen(server_socket, QUEUE_LENGTH) == -1) {
 		perror("listen() error");
-		return 0;
+		exit(1);
 	}
-	int count;
-	while(1) {
-		/*
-			Как только к серверу подключается клиент, то начинает работу
-			системный вызов accept(), он возращает дескриптор нового сокета,
-			который будет обслуживать это соединение.
-		*/
-		client_socket = accept(server_socket, NULL, NULL);
-		while(1) {
-			printf("Ожидаем сообщение...\n");
-			/*
-				Принимаем сообщение от клиента и помещаем его в buf.
-			*/
-			count = recv(client_socket, buf, MAX_BUF, 0);
-			if(!strcmp(buf, "exit")) break;
-			printf("Получено %d bytes\tСообщение: %s\n", count, buf);
-			printf("Отправляю принятое сообщение клиенту\n");
-			/*
-				Отправляем принятое сообщение обратно
-			*/
-			send(client_socket, buf, count, 0);
-        }
-        close(client_socket);  // закрываем сокет клиента
-        exit(0);
+	struct epoll_event ev, events[MAX_EVENTS];
+	int count, nfds, epollfd;
+	if ((epollfd = epoll_create1(0)) == -1) {
+        perror("epoll_create");
+        exit(1);
+    }
+    ev.events = EPOLLIN;
+    ev.data.fd = server_socket;
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, server_socket, &ev) == -1) {
+        perror("epoll_ctl: server_socket");
+        exit(1);
+    }
+	while (1) {
+		if ((nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1)) == -1)
+            perror("epoll_wait");
+        for (int i = 0; i < nfds; ++i) {
+        	if (events[i].data.fd == server_socket) {
+	        	if ((client_socket = accept(server_socket, NULL, NULL)) == -1) {
+	        		perror("accept error");
+	        		exit(1);
+	        	}
+	        	ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+                ev.data.fd = client_socket;
+                if (epoll_ctl(epollfd, EPOLL_CTL_ADD, client_socket, &ev) == -1) {
+			        perror("epoll_ctl: server_socket");
+			        exit(1);
+			    }
+	        } else {
+	        	if (events[i].events & EPOLLIN) {
+		    		printf("-> event=%lu on fd=%d\n",
+		        		(unsigned long)events[i].events,
+		        						events[i].data.fd);
+			        if ((count = recv(events[i].data.fd, buf, MAX_BUF, 0)) == -1)
+			        	perror("recv error");
+			        printf("->>%s\n", buf);
+			        if (send(events[i].data.fd, buf, count, 0) == -1)
+			        	perror("send error");
+			    }
+	        }
+	    }
 	}
 	free(buf);
-	close(server_socket);  // закрываем сокет сервера
+	close(server_socket);
 	return 0;
 }
