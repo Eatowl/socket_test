@@ -56,22 +56,22 @@ int main() {
 				ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
 				ev.data.fd = client_socket;
 				if (epoll_ctl(epollfd, EPOLL_CTL_ADD, client_socket, &ev) == -1) {
-			        perror("epoll_ctl: server_socket");
-			        exit(1);
-			    }
-	        } else {
-	        	if (events[i].events & EPOLLIN) {
-		    		printf("-> event=%lu on fd=%d\n",
-		        		(unsigned long)events[i].events,
+					perror("epoll_ctl: server_socket");
+					exit(1);
+					}
+			} else {
+				if (events[i].events & EPOLLIN) {
+					printf("-> event=%lu on fd=%d\n",
+						(unsigned long)events[i].events,
 										events[i].data.fd);
-			        if ((count = recv(events[i].data.fd, buf, MAX_BUF, 0)) == -1)
-			        	perror("recv error");
-			        printf("->>%s\n", buf);
-			        if (send(events[i].data.fd, buf, count, 0) == -1)
-			        	perror("send error");
-			    }
-	        }
-	    }
+					if ((count = recv(events[i].data.fd, buf, MAX_BUF, 0)) == -1)
+						perror("recv error");
+					printf("->>%s\n", buf);
+					if (send(events[i].data.fd, buf, count, 0) == -1)
+						perror("send error");
+				}
+			}
+		}
 	}
 	free(buf);
 	close(server_socket);
